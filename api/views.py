@@ -1,4 +1,7 @@
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, status
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
 from .serializers import RoomSerializer, CreateRoomSerializer
 from .models import Room
 from rest_framework.views import APIView
@@ -7,6 +10,11 @@ from rest_framework.response import Response
 
 # Create your views here.
 
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check previously happening
+
 
 class RoomView(generics.ListAPIView):
     queryset = Room.objects.all()
@@ -14,6 +22,7 @@ class RoomView(generics.ListAPIView):
 
 
 class CreateRoomView(APIView):
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
     serializer_class = CreateRoomSerializer
 
     def post(self, request, format=None):
